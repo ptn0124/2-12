@@ -9,6 +9,7 @@ const router = Router();
 // [기능 1] 공지사항 등록 (선생님, 반장, 부반장, 1인1역 전용)
 router.post('/', verifyToken, /** @param {import('../auth.js').AuthenticatedRequest} req */ async (req, res) => {
   const { category, content, deadline, dDayAlarm } = req.body;
+  const parsedDeadline = new Date(deadline);
 
   if (!req.user) return res.status(401).json({ error: '인증이 필요합니다.' });
 
@@ -21,7 +22,7 @@ router.post('/', verifyToken, /** @param {import('../auth.js').AuthenticatedRequ
     const newNotice = new Notice({
       category,
       content,
-      deadline,
+      deadline: parsedDeadline,
       dDayAlarm,
       authorId: req.user.id,
       authorRole: req.user.role,
@@ -31,6 +32,7 @@ router.post('/', verifyToken, /** @param {import('../auth.js').AuthenticatedRequ
     await newNotice.save();
     res.status(201).json({ message: '공지가 등록되었습니다.', data: newNotice });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: '공지 등록 오류' });
   }
 });
