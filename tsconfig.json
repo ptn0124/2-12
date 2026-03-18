@@ -1,0 +1,16 @@
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
+    "target": "esnext",
+    "checkJs": true,
+    "noEmit": true
+  },
+  "include": [
+    "*.js",
+    "**/*.js",
+    "*.d.ts",
+    "**/*.d.ts"
+  ]
+}

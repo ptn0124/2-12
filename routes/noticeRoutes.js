@@ -1,14 +1,16 @@
 import { Router } from 'express';
 import { genSalt, hash } from 'bcryptjs';
-import Notice from '../models/Notice';
-import User from '../models/User';
-import verifyToken from '../middleware/auth';
+import Notice from '../models/Notice.js';
+import User from '../models/User.js';
+import verifyToken from '../middleware/auth.js';
 
 const router = Router();
 
 // [기능 1] 공지사항 등록 (선생님, 반장, 부반장, 1인1역 전용)
-router.post('/', verifyToken, async (req, res) => {
+router.post('/', verifyToken, /** @param {import('../auth.js').AuthenticatedRequest} req */ async (req, res) => {
   const { category, content, deadline, dDayAlarm } = req.body;
+
+  if (!req.user) return res.status(401).json({ error: '인증이 필요합니다.' });
 
   const allowedRoles = ['담임', '반장', '부반장', '관리자'];
   if (!allowedRoles.includes(req.user.role)) {
@@ -34,12 +36,20 @@ router.post('/', verifyToken, async (req, res) => {
 });
 
 // [기능 2] 전체 공지 조회 (분야별 필터링은 프론트에서 처리하거나 쿼리로 처리)
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', verifyToken, /** @param {import('../auth.js').AuthenticatedRequest} req */ async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: '인증이 필요합니다.' });
+
   try {
     const { category } = req.query;
+    /** @type {{ category?: string }} */
     const query = {};
 
     if (category) {
+      // check is category is string
+      if (typeof category !== 'string') {
+        return res.status(400).json({ error: '카테고리 쿼리는 문자열이어야 합니다.' });
+      }
+
       query.category = category;
     }
 
@@ -51,7 +61,9 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // [기능 3] 알림창 전용 데이터 (D-Day 임박한 수행평가만 추출)
-router.get('/alerts', verifyToken, async (req, res) => {
+router.get('/alerts', verifyToken, /** @param {import('../auth.js').AuthenticatedRequest} req */ async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: '인증이 필요합니다.' });
+
   try {
     const notices = await Notice.find({ category: 'performance' }).sort({ deadline: 1 });
     const today = new Date();
@@ -70,8 +82,10 @@ router.get('/alerts', verifyToken, async (req, res) => {
 });
 
 // [기능 4] 비밀번호 변경 (반장, 부반장, 관리자 전용)
-router.patch('/change-pw', verifyToken, async (req, res) => {
+router.patch('/change-pw', verifyToken, /** @param {import('../auth.js').AuthenticatedRequest} req */ async (req, res) => {
   const { targetId, newPassword } = req.body;
+
+  if (!req.user) return res.status(401).json({ error: '인증이 필요합니다.' });
 
   if (!['관리자','반장', '부반장'].includes(req.user.role)) {
     return res.status(403).json({ error: '비밀번호 수정 권한이 없습니다.' });

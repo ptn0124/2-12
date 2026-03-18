@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { genSalt, hash, compare } from 'bcryptjs';
-import { sign } from 'jsonwebtoken';
-import User from '../models/User';
+import pkg from 'jsonwebtoken';
+const { sign } = pkg;
+import User from '../models/User.js';
 const router = Router();
 
 // 가입 상태 확인 (프론트에서 탭 숨김 처리용)
@@ -55,9 +56,11 @@ router.post('/login', async (req, res) => {
         const isMatch = await compare(password, user.password);
         if (!isMatch) return res.status(400).json({ error: '비밀번호가 틀렸습니다.' });
 
+        //@ts-ignore
         const token = sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.json({ message: '로그인 성공', token, role: user.role, name: user.name });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: '로그인 오류' });
     }
 });
@@ -70,6 +73,8 @@ router.patch('/approve/:userId', async (req, res) => {
 
     try {
         const targetUser = await User.findById(req.params.userId);
+        if (!targetUser) return res.status(404).json({ error: '대상 사용자를 찾을 수 없습니다.' });
+        
         if (['담임', '반장', '부반장'].includes(targetUser.role) && await User.exists({ role: targetUser.role, isApproved: true })) {
             return res.status(400).json({ error: `이미 승인된 ${targetUser.role}이(가) 있습니다.` });
         }

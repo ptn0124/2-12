@@ -2,9 +2,10 @@ import express, { json, urlencoded } from 'express';
 import { connect } from 'mongoose';
 import { schedule } from 'node-cron';
 import { unlink } from 'fs';
-import File from './models/File';
-import authRoutes from './routes/authRoutes';
-import fileRoutes from './routes/fileRoutes';
+import File from './models/File.js';
+import authRoutes from './routes/authRoutes.js';
+import fileRoutes from './routes/fileRoutes.js';
+import noticeRoutes from './routes/noticeRoutes.js';
 
 const app = express();
 
@@ -14,9 +15,11 @@ app.use(urlencoded({ extended: true }));
 // 라우터 연결
 app.use('/api/auth', authRoutes);
 app.use('/api/files', fileRoutes);
+app.use('/api/notices', noticeRoutes);
 
 // MongoDB 연결 (class_website라는 이름의 DB 사용)
-connect('mongodb://127.0.0.1:27017/class_website')
+console.log(process.env.MONGODB_URL);
+connect(process.env.MONGODB_URL ?? "")
     .then(() => console.log('✅ MongoDB 연결 성공'))
     .catch(err => console.error('❌ MongoDB 연결 실패:', err));
 
