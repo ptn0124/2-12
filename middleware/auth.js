@@ -1,5 +1,4 @@
-const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'super_secret_key_for_class'; // 실제 배포 시 환경변수로 숨길 것
+import { verify } from 'jsonwebtoken';
 
 const verifyToken = (req, res, next) => {
     // 프론트엔드에서 Headers에 'Authorization: Bearer 토큰값' 형태로 보냄
@@ -10,7 +9,7 @@ const verifyToken = (req, res, next) => {
     if (!token) return res.status(401).json({ error: '토큰 형식이 올바르지 않습니다.' });
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = verify(token, process.env.JWT_SECRET);
         req.user = decoded; // { id, role, name } 정보가 들어있음
         next(); // 다음 라우터로 통과!
     } catch (error) {
@@ -18,4 +17,4 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-module.exports = verifyToken;
+export default verifyToken;

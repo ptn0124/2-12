@@ -1,15 +1,15 @@
-const express = require('express');
-const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
-const File = require('../models/File');
-const verifyToken = require('../middleware/auth'); // 👈 미들웨어 불러오기
+import { Router } from 'express';
+import multer, { diskStorage } from 'multer';
+import { unlink } from 'fs';
+import { extname } from 'path';
+import File from '../models/File';
+import verifyToken from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 
-const storage = multer.diskStorage({
+const storage = diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
-    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+    filename: (req, file, cb) => cb(null, Date.now() + extname(file.originalname))
 });
 const upload = multer({ storage: storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -80,7 +80,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
             return res.status(403).json({ error: "삭제 권한이 없습니다." });
         }
 
-        fs.unlink(file.filePath, async (err) => {
+        unlink(file.filePath, async (err) => {
             if (err && err.code !== 'ENOENT') return res.status(500).json({ error: "물리적 삭제 실패" });
             await File.findByIdAndDelete(req.params.id);
             res.json({ message: "파일 삭제됨" });
@@ -90,4 +90,4 @@ router.delete('/:id', verifyToken, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

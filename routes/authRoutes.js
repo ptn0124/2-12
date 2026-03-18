@@ -1,10 +1,8 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const router = express.Router();
-
-const JWT_SECRET = 'super_secret_key_for_class';
+import { Router } from 'express';
+import { genSalt, hash, compare } from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
+import User from '../models/User';
+const router = Router();
 
 // 가입 상태 확인 (프론트에서 탭 숨김 처리용)
 router.get('/registration-status', async (req, res) => {
@@ -31,8 +29,8 @@ router.post('/register', async (req, res) => {
             return res.status(403).json({ error: '관리자 계정은 1개만 생성 가능합니다.' });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const salt = await genSalt(10);
+        const hashedPassword = await hash(password, salt);
 
         const newUser = new User({
             studentId, name, password: hashedPassword, role,
@@ -54,10 +52,10 @@ router.post('/login', async (req, res) => {
         if (!user) return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
         if (!user.isApproved) return res.status(403).json({ error: '관리자 승인이 필요합니다.' });
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await compare(password, user.password);
         if (!isMatch) return res.status(400).json({ error: '비밀번호가 틀렸습니다.' });
 
-        const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, JWT_SECRET, { expiresIn: '1d' });
+        const token = sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.json({ message: '로그인 성공', token, role: user.role, name: user.name });
     } catch (error) {
         res.status(500).json({ error: '로그인 오류' });
@@ -83,4 +81,4 @@ router.patch('/approve/:userId', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;
