@@ -40,14 +40,14 @@ schedule('0 0 * * *', async () => {
 
         const filesToDelete = await File.find({
             uploadDate: { $lte: sixMonthsAgo },
-            isEssential: false
+            preserve: false
         });
 
         for (const file of filesToDelete) {
             unlink(file.filePath, async (err) => {
                 if (err && err.code !== 'ENOENT') return;
                 await File.findByIdAndDelete(file._id);
-                console.log(`자동 삭제 완료: ${file.filename}`);
+                console.log(`자동 삭제 완료: ${file.fileName}`);
             });
         }
     } catch (error) {
