@@ -3,7 +3,9 @@ import PageWrapper from './components/layout/PageWrapper';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
+import LoginSuccess from './pages/LoginSuccess';
 import Register from './pages/Register';
+import RegisterSuccess from './pages/RegisterSuccess';
 import BoardList from './pages/BoardList';
 import FilesList from './pages/FilesList';
 import Timetable from './pages/Timetable';
@@ -21,7 +23,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/login-success" element={<LoginSuccess />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/register-success" element={<RegisterSuccess />} />
           
           {/* Boards & Notices */}
           <Route path="/board/community" element={<BoardList title="커뮤니티" apiCategory="일반" />} />
@@ -33,8 +37,7 @@ export default function App() {
           <Route path="/menu" element={<Menu />} />
           <Route path="/ybt" element={<Ybt />} />
           <Route path="/timetable" element={<Timetable />} />
-          <Route path="/attend/yaja" element={<Attendance title="야간자율학습 출석" description="매일 밤 야자 출석을 체크합니다" />} />
-          <Route path="/attend/studygroup" element={<Attendance title="스터디그룹 출석" description="스터디 그룹 활동 참석 여부입니다" />} />
+          <Route path="/attend" element={<Attendance />} />
           <Route path="/numberpicker" element={<NumberPicker />} />
           <Route path="/calendar" element={<Calendar />} />
         </Routes>

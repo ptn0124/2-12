@@ -15,7 +15,7 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/login', formData);
       // Optional: Store user info in context/state. For now just redirect.
-      navigate('/');
+      navigate('/login-success');
     } catch (err) {
       setError(err.response?.data?.error || '로그인에 실패했습니다.');
     } finally {

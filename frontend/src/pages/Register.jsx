@@ -19,8 +19,7 @@ export default function Register() {
     setLoading(true);
     try {
       const { data } = await api.post('/auth/register', formData);
-      setSuccessMsg(data.message || '회원가입 완료. 승인을 대기해주세요.');
-      setTimeout(() => navigate('/login'), 2500);
+      navigate('/register-success');
     } catch (err) {
       setError(err.response?.data?.error || '회원가입에 실패했습니다.');
     } finally {
@@ -39,42 +38,6 @@ export default function Register() {
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="form-control">
-              <label className="label"><span className="label-text">학번</span></label>
-              <input 
-                type="text" 
-                placeholder="21200" 
-                className="input input-bordered w-full" 
-                required 
-                value={formData.studentId}
-                onChange={(e) => setFormData({...formData, studentId: e.target.value})}
-              />
-            </div>
-
-            <div className="form-control">
-              <label className="label"><span className="label-text">이름</span></label>
-              <input 
-                type="text" 
-                placeholder="홍길동" 
-                className="input input-bordered w-full" 
-                required 
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-              />
-            </div>
-            
-            <div className="form-control">
-              <label className="label"><span className="label-text">비밀번호</span></label>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                className="input input-bordered w-full" 
-                required 
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-              />
-            </div>
-
-            <div className="form-control">
               <label className="label"><span className="label-text">역할</span></label>
               <select 
                 className="select select-bordered w-full"
@@ -86,6 +49,46 @@ export default function Register() {
                 <option value="부반장">부반장</option>
                 <option value="선생님">선생님</option>
               </select>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">{formData.role === '선생님' ? '아이디' : '학번'}</span>
+              </label>
+              <input 
+                type="text" 
+                placeholder={formData.role === '선생님' ? "teacher123" : "21200"} 
+                className="input input-bordered w-full" 
+                required 
+                value={formData.studentId}
+                onChange={(e) => setFormData({...formData, studentId: e.target.value})}
+              />
+            </div>
+
+            {formData.role !== '선생님' && (
+              <div className="form-control">
+                <label className="label"><span className="label-text">이름</span></label>
+                <input 
+                  type="text" 
+                  placeholder="홍길동" 
+                  className="input input-bordered w-full" 
+                  required 
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
+              </div>
+            )}
+            
+            <div className="form-control">
+              <label className="label"><span className="label-text">비밀번호</span></label>
+              <input 
+                type="password" 
+                placeholder="••••••••" 
+                className="input input-bordered w-full" 
+                required 
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+              />
             </div>
             
             <div className="form-control mt-6">
