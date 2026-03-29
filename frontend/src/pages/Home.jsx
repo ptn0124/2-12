@@ -468,12 +468,17 @@ export default function Home() {
         >
           {/* 중앙 로고 */}
           <div
-            className="z-30 transition-transform duration-[800ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] relative cursor-pointer"
+            className="z-30 transition-transform duration-[800ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] relative cursor-pointer group"
             style={{ transform: isOpen ? 'scale(1.15)' : 'scale(1)' }}
             onClick={() => setIsOpen(!isOpen)}
           >
             {/* 스케일 다운: w-80 -> w-64 변경하여 여백 확보 */}
-            <img src={logo2} alt="Bugil212 Logo" className="w-64 h-auto drop-shadow-sm pointer-events-none" />
+            <img 
+              src={logo2} 
+              alt="Bugil212 Logo" 
+              className={`w-64 h-auto drop-shadow-sm pointer-events-none transition-transform duration-500 
+                ${!isOpen ? 'group-hover:scale-[1.07]' : ''}`} 
+            />
           </div>
 
           {/* SVG 방사형 부채꼴 메뉴 */}
