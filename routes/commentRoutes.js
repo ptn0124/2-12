@@ -35,9 +35,7 @@ router.post('/', verifyToken, /** @param {import('../auth.js').AuthenticatedRequ
     board.comments.push({
       nickname,
       content,
-      authorId: req.user.id,
-      authorRole: req.user.role,
-      authorName: req.user.name
+      userId: req.user.id
     });
     await board.save();
 
