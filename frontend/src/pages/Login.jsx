@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ studentId: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,7 +16,9 @@ export default function Login() {
     setLoading(true);
     try {
       const { data } = await api.post('/auth/login', formData);
-      // Optional: Store user info in context/state. For now just redirect.
+      // 세션에서 유저 정보 가져오기
+      const { data: session } = await api.get('/auth/session');
+      login(session);
       navigate('/login-success');
     } catch (err) {
       setError(err.response?.data?.error || '로그인에 실패했습니다.');

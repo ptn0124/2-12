@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import { useRequireAuth } from '../contexts/AuthContext';
 
 export default function Timetable() {
+  const { isAuthed, ToastComponent } = useRequireAuth();
+
   const getTodayFormatted = () => new Date().toISOString().split('T')[0];
 
   const [date] = useState(getTodayFormatted());
@@ -108,6 +111,15 @@ export default function Timetable() {
   }, [selections, showSetup]);
 
   const subjectOptions = ['물리학', '화학', '생명과학', '지구과학', '인공지능 기초'];
+
+  if (!isAuthed) {
+    return (
+      <div className="flex-grow flex items-center justify-center">
+        {ToastComponent}
+        <span className="loading loading-spinner loading-lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-grow w-full max-w-5xl mx-auto flex flex-col pt-12 items-center text-center space-y-12">
