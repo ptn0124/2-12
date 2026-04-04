@@ -5,7 +5,7 @@ import { extname } from 'path';
 import Board from '../models/Board.js';
 import User from '../models/User.js';
 import verifyToken from '../middleware/auth.js';
-import { redactAuthorId } from './commentsRoutes.js';
+import { redactAuthorId } from './commentRoutes.js';
 
 const router = Router();
 
