@@ -3,7 +3,6 @@ import { connect } from 'mongoose';
 import { schedule } from 'node-cron';
 import { unlink } from 'fs';
 import cookieParser from 'cookie-parser';
-import File from './models/File.js';
 import authRoutes from './routes/authRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import boardRoutes from './routes/boardRoutes.js';
