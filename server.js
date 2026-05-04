@@ -3,11 +3,8 @@ import mongoose from 'mongoose';
 import cron from 'node-cron';
 import { unlink } from 'fs';
 import cookieParser from 'cookie-parser';
-
 const { json, urlencoded } = express;
 const { connect } = mongoose;
-const { schedule } = cron;
-
 import authRoutes from './routes/authRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import boardRoutes from './routes/boardRoutes.js';
