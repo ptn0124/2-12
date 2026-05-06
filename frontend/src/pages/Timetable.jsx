@@ -195,7 +195,7 @@ export default function Timetable() {
                 ) : (
                   timetable.map((row, rowIdx) => (
                     <tr key={rowIdx} className="hover:bg-base-50 transition-colors border-b last:border-b-0 border-base-200/30">
-                      <td className="py-4 font-bold text-lg text-neutral/50 bg-base-100/30 border-r border-base-200/30">
+                      <td className="py-4 font-bold text-lg text-neutral/50 dark:text-white/50 bg-base-100/30 border-r border-base-200/30">
                         {rowIdx + 1}
                       </td>
                       {row.map((cell, colIdx) => (
