@@ -129,7 +129,7 @@ export default function Timetable() {
       </div>
 
       {showSetup ? (
-        <div className="w-full max-w-md bg-base-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border-2 border-base-200/50 rounded-3xl p-8 flex flex-col items-center">
+        <div className="w-full max-w-md bg-base-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border-2 border-base-200 dark:border-base-100 rounded-3xl p-8 flex flex-col items-center">
           <h3 className="text-2xl font-bold mb-6">탐구 과목 설정</h3>
           <p className="text-base-content/70 mb-8 text-sm">개인의 이동수업 시간표를 확인하기 위해<br />각 블록별로 수강하는 과목을 선택해주세요.</p>
 
@@ -199,7 +199,7 @@ export default function Timetable() {
                         {rowIdx + 1}
                       </td>
                       {row.map((cell, colIdx) => (
-                        <td key={colIdx} className="py-4 font-bold text-[17px] tracking-tight bg-white border-r last:border-r-0 border-base-200/30 relative">
+                        <td key={colIdx} className="py-4 font-bold text-[17px] tracking-tight bg-white dark:bg-base-200 border-r last:border-r-0 border-base-200 dark:border-base-100 relative">
                           {cell.subject ? (
                             <div className="flex flex-col items-center">
                               <span className="text-blue-600 mb-1">{cell.subject}</span>
