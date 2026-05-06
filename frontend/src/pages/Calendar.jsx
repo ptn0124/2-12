@@ -185,7 +185,7 @@ export default function Calendar() {
                   <div
                     key={idx}
                     onClick={() => openModal(date)}
-                    className={`min-h-24 sm:min-h-28 flex flex-col p-1 border rounded-md cursor-pointer hover:bg-base-200 transition-colors ${!isCurrentMonth ? 'opacity-30' : ''}`}
+                    className={`min-h-24 sm:min-h-28 flex flex-col p-2 border dark:border-base-300 rounded-md cursor-pointer hover:bg-base-200 transition-colors ${!isCurrentMonth ? 'opacity-30' : ''}`}
                   >
                     <div className="flex justify-between items-start">
                       <div className={`text-xs sm:text-sm font-medium ${date.getDay() === 0 ? 'text-error' : date.getDay() === 6 ? 'text-info' : ''}`}>

@@ -7,7 +7,7 @@ function SlotReel({ index, duration, isResetting }) {
   return (
     <div className="relative" style={{ height: `${ITEM_HEIGHT}px`, width: '48px' }}>
       <div
-        className="absolute top-0 left-0 flex flex-col items-center justify-start text-black w-full"
+        className="absolute top-0 left-0 flex flex-col items-center justify-start text-black dark:text-white w-full"
         style={{
           transform: `translateY(-${index * ITEM_HEIGHT}px)`,
           transition: isResetting ? 'none' : `transform ${duration}ms cubic-bezier(0.1, 0.9, 0.43, 1)`,
@@ -98,8 +98,8 @@ export default function NumberPicker() {
         <h2 className="select-none text-3xl font-bold mb-2">랜덤 번호 추첨</h2>
       </div>
 
-      <div className="relative w-40 h-28 rounded-2xl border-[6px] border-base-300 flex items-center justify-center overflow-hidden bg-white shadow-inner">
-        {isEmpty && <span className="select-none absolute text-6xl font-black z-10 w-full h-full flex items-center justify-center bg-white">?</span>}
+      <div className="relative w-40 h-28 rounded-2xl border-[6px] border-base-300 flex items-center justify-center overflow-hidden bg-white dark:bg-base-200 shadow-inner">
+        {isEmpty && <span className="select-none absolute text-6xl font-black z-10 w-full h-full flex items-center justify-center bg-white dark:bg-base-200">?</span>}
 
         <div className={`select-none flex gap-3 ${isEmpty ? 'opacity-0' : 'opacity-100'}`} style={{ height: `${ITEM_HEIGHT}px` }}>
           <SlotReel index={tensIndex} duration={3000} isResetting={isResetting} />

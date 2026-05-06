@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 
+const mealName = {
+  '조식': '아침',
+  '중식': '점심',
+  '석식': '저녁',
+}
+
 export default function Menu() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [meals, setMeals] = useState([]);
@@ -37,7 +43,7 @@ export default function Menu() {
     return text.split('<br/>').map((item, idx) => {
       // "식단명 (1.2.3.4)" 형태에서 괄호 안의 알레르기 부분 제거, "*" 등 제거
       const cleanName = item.replace(/\([0-9.\s]+\)|[*]/g, '').trim();
-      return <div key={idx} className="py-1 border-b last:border-0 border-base-200/50">{cleanName}</div>;
+      return <div key={idx} className="py-1 border-b last:border-0 border-base-200 dark:border-base-100 ">{cleanName}</div>;
     });
   };
 
@@ -57,7 +63,7 @@ export default function Menu() {
         />
       </div>
 
-      <div className="w-full px-4 w-full justify-center pb-8 flex flex-col md:flex-row gap-6">
+      <div className="px-4 w-full justify-center pb-8 flex flex-col md:flex-row gap-6">
         {loading ? (
           <div className="py-20 flex w-full justify-center">
             <span className="loading loading-spinner loading-lg text-neutral"></span>
@@ -65,19 +71,17 @@ export default function Menu() {
         ) : error ? (
           <div className="py-20 text-red-500 w-full text-center">급식 정보를 불러오는데 실패했습니다.</div>
         ) : meals.length === 0 ? (
-          <div className="py-20 text-base-content/50 w-full text-center text-lg bg-base-100 rounded-3xl border-2">해당 날짜의 급식 정보가 없습니다. (휴일/주말 등)</div>
+          <div className="py-20 text-base-content w-full text-center text-lg bg-base-100 rounded-3xl border-2">해당 날짜의 급식 정보가 없습니다. (휴일/주말 등)</div>
         ) : (
           meals.map((meal, index) => (
-            <div key={index} className="flex-1 card bg-base-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border-2 border-base-200/50 rounded-3xl overflow-hidden hover:border-neutral transition-colors">
-              <div className="py-4 border-b-2 border-base-200/50 bg-base-200/30">
+            <div key={index} className="flex-1 card bg-base-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border-2 border-base-200 rounded-3xl overflow-hidden hover:border-neutral transition-colors">
+              <div className="py-4 border-b-2 border-base-200 bg-base-200">
                 <h3 className="text-xl font-bold tracking-wide">
-                  {meal.MMEAL_SC_NM === '조식' && '아침'}
-                  {meal.MMEAL_SC_NM === '중식' && '점심'}
-                  {meal.MMEAL_SC_NM === '석식' && '저녁'}
+                  {mealName[meal.MMEAL_SC_NM] ?? meal.MMEAL_SC_NM}
                 </h3>
                 <p className="text-sm opacity-60 mt-1">{meal.CAL_INFO}</p>
               </div>
-              <div className="card-body p-6 text-base font-medium leading-relaxed bg-white">
+              <div className="card-body p-6 text-base font-medium leading-relaxed bg-white dark:bg-base-200">
                 {formatMenuText(meal.DDISH_NM)}
               </div>
             </div>
