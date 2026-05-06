@@ -13,8 +13,8 @@ export default function RegisterSuccess() {
           </div>
           <h2 className="card-title text-2xl font-bold mb-2">회원가입 완료!</h2>
           <p className="text-base-content/70 text-sm mb-6 leading-relaxed">
-            성공적으로 가입되었습니다.<br/>
-            관리자 승인 후 즉시 이용 가능합니다.
+            <p>성공적으로 가입되었습니다.</p>
+            <p>관리자 승인 후 즉시 이용 가능합니다.</p>
           </p>
           <button onClick={() => navigate('/login')} className="btn btn-neutral w-full">
             로그인 화면으로
