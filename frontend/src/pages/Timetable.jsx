@@ -1,116 +1,125 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useEffectEvent, useCallback } from 'react';
 import api from '../services/api';
 import { useRequireAuth } from '../contexts/AuthContext';
 
 export default function Timetable() {
   const { isAuthed, ToastComponent } = useRequireAuth();
 
-  const getTodayFormatted = () => new Date().toISOString().split('T')[0];
-
-  const [date] = useState(getTodayFormatted());
   const [timetable, setTimetable] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [showSetup, setShowSetup] = useState(false);
+  const [serverSelections, setServerSelections] = useState({});
   const [selections, setSelections] = useState({
-    '탐구A': '',
-    '탐구B': '',
-    '탐구C': ''
+    '탐구A': null,
+    '탐구B': null,
+    '탐구C': null
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('userSelects');
-    if (saved) {
-      setSelections(JSON.parse(saved));
+    if (timetable.length == 0 || (serverSelections['탐구A'] && serverSelections['탐구B'] && serverSelections['탐구C'])) {
+      setShowSetup(false);
     } else {
       setShowSetup(true);
     }
-  }, []);
+  }, [serverSelections, timetable]);
 
-  const handleSaveSelections = () => {
-    localStorage.setItem('userSelects', JSON.stringify(selections));
-    setShowSetup(false);
+  const fetchTimetable = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const d = new Date();
+      const day = d.getDay();
+      const diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d);
+      monday.setDate(diffToMonday);
+      const friday = new Date(d);
+      friday.setDate(diffToMonday + 4);
+
+      const format = dt => dt.getFullYear() + String(dt.getMonth() + 1).padStart(2, '0') + String(dt.getDate()).padStart(2, '0');
+      const startDate = format(monday);
+      const endDate = format(friday);
+
+      const response = await api.get(`/timetable`, { params: { start: startDate, end: endDate } });
+      const data = response.data;
+
+      const newGrid = Array(7).fill(null).map(() => Array(5).fill({ name: '-' }));
+
+      if (Array.isArray(data?.timetable)) {
+        data.timetable.forEach(item => {
+          const ymd = item.date;
+          const year = parseInt(ymd.slice(0, 4), 10);
+          const month = parseInt(ymd.slice(4, 6), 10) - 1;
+          const dayOfDate = parseInt(ymd.slice(6, 8), 10);
+          const colIdx = new Date(year, month, dayOfDate).getDay() - 1;
+          const rowIdx = parseInt(item.period) - 1;
+
+          if (rowIdx >= 0 && rowIdx < 7 && colIdx >= 0 && colIdx < 5) {
+            const baseName = item.name.replace(/\*/g, '').trim();
+
+            newGrid[rowIdx][colIdx] = {
+              name: baseName,
+              subject: item.subject ?? null,
+              room: item.room ?? null,
+              teacher: item.teacher ?? null
+            };
+          }
+        });
+
+        if (data?.selections) {
+          setServerSelections(prev => ({ ...prev, ...data.selections }));
+          setSelections(prev => ({ ...prev, ...data.selections }));
+        }
+      }
+      setTimetable(newGrid);
+
+    } catch (err) {
+      console.error('시간표 정보를 불러오는데 실패했습니다:', err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    const fetchTimetable = async () => {
-      setLoading(true);
-      setError(false);
-      try {
-        const d = new Date();
-        const day = d.getDay();
-        const diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
-        const monday = new Date(d);
-        monday.setDate(diffToMonday);
-        const friday = new Date(d);
-        friday.setDate(diffToMonday + 4);
-
-        const format = dt => dt.getFullYear() + String(dt.getMonth() + 1).padStart(2, '0') + String(dt.getDate()).padStart(2, '0');
-        const startDate = format(monday);
-        const endDate = format(friday);
-
-        const response = await api.get(`/timetable`, { params: { start: startDate, end: endDate } });
-        const data = response.data;
-
-        const getRoom = (block, subject) => {
-          if (!subject) return '';
-          if (subject.includes('인공지능 기초')) return '컴퓨터실';
-          if (subject.includes('생명과학')) return '2-5';
-          if (subject.includes('물리')) {
-            if (block === '탐구A' || block === '탐구B') return '2-7';
-            if (block === '탐구C') return '2-4';
-          }
-          if (subject.includes('화학')) {
-            if (block === '탐구A') return '2-5';
-            if (block === '탐구B') return '2-3';
-            if (block === '탐구C') return '2-12';
-          }
-          return '';
-        };
-
-        const newGrid = Array(7).fill(null).map(() => Array(5).fill({ name: '-' }));
-
-        if (Array.isArray(data)) {
-          data.forEach(item => {
-            const ymd = item.date;
-            const year = parseInt(ymd.slice(0, 4), 10);
-            const month = parseInt(ymd.slice(4, 6), 10) - 1;
-            const dayOfDate = parseInt(ymd.slice(6, 8), 10);
-            const colIdx = new Date(year, month, dayOfDate).getDay() - 1;
-            const rowIdx = parseInt(item.period) - 1;
-
-            if (rowIdx >= 0 && rowIdx < 7 && colIdx >= 0 && colIdx < 5) {
-              const baseName = item.name.replace(/\*/g, '').trim();
-              const savedSubject = selections[baseName];
-
-              const finalSubject = savedSubject || item.subject;
-              const finalRoom = finalSubject ? getRoom(baseName, finalSubject) : item.room;
-
-              newGrid[rowIdx][colIdx] = {
-                name: baseName,
-                subject: finalSubject,
-                room: finalRoom,
-                teacher: item.teacher
-              };
-            }
-          });
-        }
-        setTimetable(newGrid);
-
-      } catch (err) {
-        console.error('시간표 정보를 불러오는데 실패했습니다:', err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (!showSetup) {
       fetchTimetable();
     }
-  }, [selections, showSetup]);
+  }, [showSetup]);
 
-  const subjectOptions = ['물리학', '화학', '생명과학', '지구과학', '인공지능 기초'];
+  const handleSaveSelections = (async () => {
+    try {
+      setLoading(true);
+      await api.post('/timetable/select', { selections: Object.entries(selections).map(([name, subject]) => ({ name, ...subject })) });
+      setShowSetup(false);
+    } catch (err) {
+      console.error('선택한 과목을 저장하는데 실패했습니다:', err);
+    } finally {
+      // 시간표를 다시 불러와서 업데이트
+      setTimetable([]);
+      setError(false);
+      setLoading(true);
+    }
+  });
+
+  // const subjectOptions = ['물리학', '화학', '생명과학', '지구과학', '인공지능 기초'];
+  const subjectOptions = {
+    '탐구A': {
+      '물리학': { teacher: '이선경', room: '207' },
+      '인공지능 기초': { teacher: '최다솜', room: '컴퓨터실2' },
+      '화학': { teacher: '하희연', room: '203' },
+    },
+    '탐구B': {
+      '물리학': { teacher: '이선경', room: '207' },
+      '인공지능 기초': { teacher: '최다솜', room: '컴퓨터실2' },
+      '화학': { teacher: '하희연', room: '203' },
+    },
+    '탐구C': {
+      '물리학': { teacher: '이선경', room: '204' },
+      '생명과학': { teacher: '박완수', room: '205' },
+      '화학': { teacher: '석영광', room: '212' },
+    }
+  }
 
   if (!isAuthed) {
     return (
@@ -134,19 +143,19 @@ export default function Timetable() {
           <p className="text-base-content/70 mb-8 text-sm">개인의 이동수업 시간표를 확인하기 위해<br />각 블록별로 수강하는 과목을 선택해주세요.</p>
 
           <div className="w-full space-y-4">
-            {['탐구A', '탐구B', '탐구C'].map(block => (
+            {Object.keys(subjectOptions).map(block => (
               <div key={block} className="form-control w-full">
                 <label className="label">
                   <span className="label-text font-bold text-base">{block}</span>
                 </label>
                 <select
                   className="select select-bordered w-full"
-                  value={selections[block]}
-                  onChange={(e) => setSelections({ ...selections, [block]: e.target.value })}
+                  value={selections[block]?.subject || ''}
+                  onChange={(e) => setSelections({ ...selections, [block]: { subject: e.target.value, ...(subjectOptions[block]?.[e.target.value] ?? {}) } })}
                 >
-                  <option value="" disabled>과목을 선택하세요</option>
-                  {subjectOptions.map(sub => (
-                    <option key={sub} value={sub}>{sub}</option>
+                  <option value="" disabled selected>과목을 선택하세요</option>
+                  {Object.entries(subjectOptions[block] || {}).map(([sub, { teacher, room }]) => (
+                    <option key={sub} value={sub}>{sub} ({teacher} 선생님, {room})</option>
                   ))}
                 </select>
               </div>
@@ -156,8 +165,9 @@ export default function Timetable() {
           <button
             className="btn btn-neutral w-full mt-8 rounded-xl font-bold text-lg" // Neutral dark button, consistent with minimal design
             onClick={handleSaveSelections}
-            disabled={!selections['탐구A'] || !selections['탐구B'] || !selections['탐구C']}
+            disabled={!selections['탐구A'] || !selections['탐구B'] || !selections['탐구C'] || loading}
           >
+            {loading ? <span className="loading loading-spinner loading-lg text-neutral"></span> : null}
             설정 완료 및 시간표 보기
           </button>
         </div>
